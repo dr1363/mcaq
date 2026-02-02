@@ -671,6 +671,143 @@ async def ask_question(room_id: str, question_data: Dict[str, str], current_user
     
     return {k: v for k, v in question_dict.items() if k != '_id'}
 
+@api_router.post("/flags/submit")
+async def submit_flag(request: SubmitFlagRequest, current_user: dict = Depends(get_current_user)):
+    room = await db.rooms.find_one({'id': request.room_id}, {'_id': 0})
+    if not room:
+        raise HTTPException(status_code=404, detail="Room not found")
+    
+    submitted_flag = request.flag
+    is_correct = submitted_flag in room.get('flags', [])
+    
+    if is_correct:
+        progress = await db.user_progress.find_one(
+            {'user_id': current_user['id'], 'room_id': request.room_id},
+            {'_id': 0}
+        )
+        
+        if not progress:
+            progress = UserProgress(
+                user_id=current_user['id'],
+                room_id=request.room_id,
+                completed=True
+            )
+            progress_dict = progress.model_dump()
+            progress_dict['started_at'] = progress.started_at.isoformat()
+            progress_dict['completed_at'] = datetime.now(timezone.utc).isoformat()
+            await db.user_progress.insert_one(progress_dict)
+            
+            new_xp = current_user['xp'] + room.get('xp_reward', 100)
+            await db.users.update_one(
+                {'id': current_user['id']},
+                {'$set': {'xp': new_xp}, '$push': {'completed_rooms': request.room_id}}
+            )
+            
+            return {'correct': True, 'message': 'Flag correct! Room completed!', 'xp_earned': room.get('xp_reward', 100)}
+        else:
+            return {'correct': True, 'message': 'Flag correct! Already completed.'}
+    
+    return {'correct': False, 'message': 'Incorrect flag. Try again!'}
+
+@api_router.post("/admin/room-flags/add")
+async def add_room_flag(room_id: str, flag_data: Dict[str, Any], current_user: dict = Depends(get_current_user)):
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    flag = RoomFlagModel(
+        room_id=room_id,
+        question=flag_data.get('question', ''),
+        correct_answer=flag_data.get('correct_answer', ''),
+        points=flag_data.get('points', 10),
+        order=flag_data.get('order', 0)
+    )
+    
+    flag_dict = flag.model_dump()
+    flag_dict['created_at'] = flag.created_at.isoformat()
+    await db.room_flags.insert_one(flag_dict)
+    
+    return {k: v for k, v in flag_dict.items() if k != '_id'}
+
+@api_router.get("/room-flags/{room_id}")
+async def get_room_flags(room_id: str):
+    flags = await db.room_flags.find(
+        {'room_id': room_id},
+        {'_id': 0, 'correct_answer': 0}
+    ).sort('order', 1).to_list(100)
+    return flags
+
+@api_router.get("/admin/room-flags/{room_id}")
+async def get_admin_room_flags(room_id: str, current_user: dict = Depends(get_current_user)):
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    flags = await db.room_flags.find(
+        {'room_id': room_id},
+        {'_id': 0}
+    ).sort('order', 1).to_list(100)
+    return flags
+
+@api_router.post("/room-flags/check")
+async def check_flag_answer(flag_id: str, answer_data: Dict[str, str], current_user: dict = Depends(get_current_user)):
+    flag = await db.room_flags.find_one({'id': flag_id}, {'_id': 0})
+    if not flag:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    submitted_answer = answer_data.get('answer', '').strip()
+    is_correct = submitted_answer.lower() == flag['correct_answer'].lower()
+    
+    submission = FlagSubmissionModel(
+        room_id=flag['room_id'],
+        flag_id=flag_id,
+        user_id=current_user['id'],
+        submitted_answer=submitted_answer,
+        is_correct=is_correct
+    )
+    
+    submission_dict = submission.model_dump()
+    submission_dict['submitted_at'] = submission.submitted_at.isoformat()
+    
+    existing = await db.flag_submissions.find_one({
+        'flag_id': flag_id,
+        'user_id': current_user['id'],
+        'is_correct': True
+    }, {'_id': 0})
+    
+    if not existing:
+        await db.flag_submissions.insert_one(submission_dict)
+        
+        if is_correct:
+            new_xp = current_user['xp'] + flag.get('points', 10)
+            await db.users.update_one(
+                {'id': current_user['id']},
+                {'$inc': {'xp': flag.get('points', 10)}}
+            )
+            return {'correct': True, 'message': 'Correct answer!', 'points_earned': flag.get('points', 10)}
+    else:
+        if is_correct:
+            return {'correct': True, 'message': 'Already answered correctly!', 'points_earned': 0}
+    
+    return {'correct': False, 'message': 'Incorrect answer. Try again!'}
+
+@api_router.delete("/admin/room-flags/{flag_id}")
+async def delete_room_flag(flag_id: str, current_user: dict = Depends(get_current_user)):
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    result = await db.room_flags.delete_one({'id': flag_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    return {'message': 'Question deleted'}
+
+@api_router.get("/user/answered-flags")
+async def get_user_answered_flags(current_user: dict = Depends(get_current_user)):
+    submissions = await db.flag_submissions.find(
+        {'user_id': current_user['id'], 'is_correct': True},
+        {'_id': 0}
+    ).to_list(1000)
+    return [s['flag_id'] for s in submissions]
+
 @api_router.get("/questions/{room_id}")
 async def get_questions(room_id: str):
     questions = await db.questions.find(
