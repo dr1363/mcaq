@@ -1002,7 +1002,8 @@ const babelMetadataPlugin = ({ types: t }) => {
       const memberInfo = analyzeMemberExpression(
         callExprParent.get("callee.object"),
         state,
-        depth + 1
+        depth + 1,
+        visitedPaths
       );
       if (memberInfo) {
         arrayVar = memberInfo.varName;
