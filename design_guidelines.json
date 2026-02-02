@@ -1,0 +1,130 @@
+{
+  "identity": {
+    "name": "HackLidoLearn",
+    "tone": "Cyberpunk, Authoritative, Immersive, Gamified",
+    "audience": "Aspiring Hackers, Security Professionals, CTF Players",
+    "mission": "To provide a realistic, hands-on cybersecurity learning experience in a browser-based environment."
+  },
+  "typography": {
+    "primary_font": "Inter",
+    "heading_font": "Orbitron",
+    "mono_font": "JetBrains Mono",
+    "scale": {
+      "h1": "text-5xl md:text-7xl font-black tracking-tighter uppercase",
+      "h2": "text-3xl md:text-5xl font-bold tracking-tight",
+      "h3": "text-2xl md:text-3xl font-bold tracking-tight",
+      "body": "text-base md:text-lg leading-relaxed text-gray-300",
+      "code": "font-mono text-sm md:text-base"
+    },
+    "imports": [
+      "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@400;500;700;900&display=swap');"
+    ]
+  },
+  "colors": {
+    "palette": {
+      "background": "#050505",
+      "surface": "#0a0a0a",
+      "surface_highlight": "#121212",
+      "primary": "#00ff41",
+      "primary_dim": "#008F11",
+      "secondary": "#00f3ff",
+      "accent": "#ff003c",
+      "text_main": "#e0e0e0",
+      "text_muted": "#a0a0a0",
+      "border": "#333333",
+      "border_active": "#00ff41"
+    },
+    "usage": {
+      "body_bg": "bg-[#050505]",
+      "card_bg": "bg-[#0a0a0a]/80 backdrop-blur-md border border-white/10",
+      "primary_text": "text-[#00ff41]",
+      "secondary_text": "text-[#00f3ff]",
+      "accent_text": "text-[#ff003c]",
+      "success": "text-[#00ff41]",
+      "error": "text-[#ff003c]",
+      "warning": "text-yellow-400"
+    }
+  },
+  "visual_enhancers": {
+    "borders": "border border-white/10 hover:border-[#00ff41]/50 transition-colors duration-300",
+    "shadows": "shadow-[0_0_20px_rgba(0,255,65,0.1)]",
+    "glows": "drop-shadow-[0_0_8px_rgba(0,255,65,0.5)]",
+    "glassmorphism": "bg-black/40 backdrop-blur-xl border border-white/5",
+    "gradients": "bg-gradient-to-r from-[#00ff41] to-[#00f3ff] bg-clip-text text-transparent",
+    "animations": {
+      "glitch": "animate-pulse",
+      "scanline": "bg-[linear-gradient(to_bottom,transparent_50%,rgba(0,0,0,0.5)_51%)] bg-[length:100%_4px]"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-[#00ff41] text-black font-bold uppercase tracking-widest hover:bg-[#00cc33] hover:shadow-[0_0_15px_rgba(0,255,65,0.6)] transition-all duration-200 rounded-none clip-path-polygon-[0_0,100%_0,100%_80%,90%_100%,0_100%]",
+      "secondary": "border border-[#00ff41] text-[#00ff41] hover:bg-[#00ff41]/10 uppercase tracking-widest transition-all duration-200 rounded-none",
+      "ghost": "text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+    },
+    "cards": {
+      "default": "bg-[#0a0a0a] border border-white/10 p-6 rounded-sm hover:border-[#00ff41]/30 transition-all group relative overflow-hidden",
+      "interactive": "cursor-pointer hover:translate-y-[-2px] hover:shadow-lg transition-transform duration-300"
+    },
+    "inputs": {
+      "default": "bg-black/50 border border-white/20 focus:border-[#00ff41] focus:ring-1 focus:ring-[#00ff41] text-white placeholder:text-gray-600 font-mono rounded-none"
+    },
+    "badges": {
+      "default": "bg-white/5 text-white border border-white/10 px-2 py-0.5 text-xs font-mono uppercase tracking-wider",
+      "success": "bg-[#00ff41]/10 text-[#00ff41] border border-[#00ff41]/20",
+      "warning": "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20",
+      "danger": "bg-[#ff003c]/10 text-[#ff003c] border border-[#ff003c]/20"
+    }
+  },
+  "layout_strategies": {
+    "dashboard": "grid grid-cols-1 md:grid-cols-12 gap-4 p-4 md:p-8",
+    "landing": "flex flex-col gap-24 pb-24",
+    "lab": "grid grid-cols-1 lg:grid-cols-2 h-[calc(100vh-4rem)] overflow-hidden",
+    "bento_grid": {
+      "hero": "col-span-1 md:col-span-8 row-span-2",
+      "sidebar": "col-span-1 md:col-span-4 row-span-2",
+      "stat": "col-span-1 md:col-span-4"
+    }
+  },
+  "image_urls": {
+    "hero_background": "https://images.unsplash.com/photo-1680992045535-95919d4971a9?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NjV8MHwxfHNlYXJjaHwyfHxzZXJ2ZXIlMjByb29tJTIwbmVvbiUyMGxpZ2h0c3xlbnwwfHx8fDE3NzAwMzU1NDl8MA&ixlib=rb-4.1.0&q=85",
+    "hacker_terminal": "https://images.unsplash.com/photo-1719255418097-acf2f18306ce?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDB8MHwxfHNlYXJjaHwyfHxjeWJlcnB1bmslMjBoYWNrZXIlMjB0ZXJtaW5hbHxlbnwwfHx8fDE3NzAwMzU1NDZ8MA&ixlib=rb-4.1.0&q=85",
+    "cyber_lock": "https://images.unsplash.com/photo-1768839720936-87ce3adf2d08?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NjV8MHwxfHNlYXJjaHwxfHxjeWJlcnNlY3VyaXR5JTIwbG9jayUyMGRpZ2l0YWx8ZW58MHx8fHwxNzcwMDM1NTU0fDA&ixlib=rb-4.1.0&q=85",
+    "server_room": "https://images.unsplash.com/photo-1680992046617-e2e35451bcdb?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NjV8MHwxfHNlYXJjaHwxfHxzZXJ2ZXIlMjByb29tJTIwbmVvbiUyMGxpZ2h0c3xlbnwwfHx8fDE3NzAwMzU1NDl8MA&ixlib=rb-4.1.0&q=85"
+  },
+  "instructions_to_main_agent": [
+    "Implement the 'Orbitron' font for all headings to give a strong sci-fi identity.",
+    "Use 'JetBrains Mono' for all code blocks, terminal inputs, and technical data displays.",
+    "The primary color is Neon Green (#00ff41). Use it for primary actions, success states, and terminal prompts.",
+    "The secondary color is Cyber Cyan (#00f3ff). Use it for links, information highlights, and secondary borders.",
+    "The accent color is Cyber Red (#ff003c). Use it strictly for errors, 'attack' simulations, and destructive actions.",
+    "Backgrounds should never be pure black (#000000) unless it's a terminal window. Use #050505 or #0a0a0a for page backgrounds.",
+    "Use 'Glassmorphism' for cards and overlays: bg-black/40 backdrop-blur-xl border border-white/5.",
+    "Implement a 'Bento Grid' layout for the Dashboard: mix large hero widgets with smaller stat cards.",
+    "For the Interactive Lab: Use a split-screen layout. Left side for instructions (scrollable), Right side for the Terminal (fixed).",
+    "Add 'data-testid' to all interactive elements for testing.",
+    "Ensure all text has sufficient contrast. Use white or off-white (#e0e0e0) for body text.",
+    "Do not use rounded corners for buttons or inputs. Keep them sharp (rounded-none or rounded-sm) to match the brutalist/cyberpunk aesthetic.",
+    "Use the provided image URLs for backgrounds and feature showcases. Do not use placeholders."
+  ],
+  "universal_guidelines": [
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients.",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy.",
+    "Use glass-morphism effects with backdrop filters (12-24px blur).",
+    "You MUST NOT apply universal transition. Eg: transition: all. This results in breaking transforms. Always add transitions for specific interactive elements like button, input excluding transforms.",
+    "You MUST NOT center align the app container, ie do not add .App { text-align: center; } in the css file. This disrupts the human natural reading flow of text.",
+    "Always use modern button styles like pill-shaped, or sharp button with interaction animations & color relevant to the app style.",
+    "NEVER: use AI assistant Emoji characters like 🤖🧠💭💡🔮🎯📚🎭🎬🎪🎉🎊🎁🎀🎂🍰🎈🎨🎰💰💵💳🏦💎🪙💸🤑📊📈📉💹🔢🏆🥇 etc for icons.",
+    "Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations. Static = dead.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations: separates good from extraordinary.",
+    "Main agent relies on these image URLs. Missing categories (especially sponsor logos) = main agent will use placeholder text which is FORBIDDEN.",
+    "Prioritize using pre-existing components from src/components/ui when applicable.",
+    "Create new components that match the style and conventions of existing components when needed.",
+    "Examine existing components to understand the project's component patterns before creating new ones.",
+    "Components MUST use named exports (export const ComponentName = ...).",
+    "Pages MUST use default exports (export default function PageName() {...}).",
+    "Use 'sonner' for toasts. Sonner component are located in /app/src/components/ui/sonner.tsx."
+  ]
+}
