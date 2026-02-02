@@ -292,14 +292,19 @@ function usageIsCompositePortal({
         if (/^[A-Z]/.test(name || "")) {
           const innerBinding = op.scope.getBinding(name);
           if (innerBinding && innerBinding.path) {
-            innerBinding.path.traverse({
-              JSXOpeningElement(innerOp) {
-                const innerName = jsxNameOf(innerOp.node, t);
-                if (isPortalishName(innerName, RADIX_ROOTS)) {
-                  hit = true;
-                }
-              }
-            });
+            // Prevent infinite recursion by checking if we're already traversing this binding
+            if (!innerBinding.path._traversing) {
+              innerBinding.path._traversing = true;
+              innerBinding.path.traverse({
+                JSXOpeningElement(innerOp) {
+                  const innerName = jsxNameOf(innerOp.node, t);
+                  if (isPortalishName(innerName, RADIX_ROOTS)) {
+                    hit = true;
+                  }
+                },
+              });
+              innerBinding.path._traversing = false;
+            }
           }
         }
       },
