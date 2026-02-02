@@ -146,26 +146,31 @@ const AdminRooms = () => {
               </DialogHeader>
               <div className="space-y-4 max-h-[60vh] overflow-y-auto">
                 <div>
-                  <Label className="text-textMain font-mono">Title</Label>
+                  <Label className="text-textMain font-mono">Title *</Label>
                   <Input
                     value={formData.title}
                     onChange={(e) => setFormData({...formData, title: e.target.value})}
                     className="bg-black/50 border-white/20 text-white"
+                    placeholder="e.g., SQL Injection Challenge"
                     data-testid="room-title-input"
                   />
                 </div>
+                
                 <div>
-                  <Label className="text-textMain font-mono">Description</Label>
+                  <Label className="text-textMain font-mono">Description *</Label>
                   <Textarea
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
                     className="bg-black/50 border-white/20 text-white"
+                    placeholder="Brief description of the challenge"
+                    rows={2}
                     data-testid="room-description-input"
                   />
                 </div>
+                
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-textMain font-mono">Difficulty</Label>
+                    <Label className="text-textMain font-mono">Difficulty *</Label>
                     <select
                       value={formData.difficulty}
                       onChange={(e) => setFormData({...formData, difficulty: e.target.value})}
@@ -178,25 +183,100 @@ const AdminRooms = () => {
                     </select>
                   </div>
                   <div>
-                    <Label className="text-textMain font-mono">XP Reward</Label>
-                    <Input
-                      type="number"
-                      value={formData.xp_reward}
-                      onChange={(e) => setFormData({...formData, xp_reward: parseInt(e.target.value)})}
-                      className="bg-black/50 border-white/20 text-white"
-                      data-testid="room-xp-input"
-                    />
+                    <Label className="text-textMain font-mono">Category *</Label>
+                    <select
+                      value={formData.category}
+                      onChange={(e) => setFormData({...formData, category: e.target.value})}
+                      className="w-full bg-black/50 border border-white/20 text-white p-2 rounded"
+                    >
+                      <option>General</option>
+                      <option>Web</option>
+                      <option>Networking</option>
+                      <option>Linux</option>
+                      <option>OSINT</option>
+                      <option>Cryptography</option>
+                      <option>Forensics</option>
+                      <option>Reverse Engineering</option>
+                    </select>
                   </div>
                 </div>
+                
                 <div>
-                  <Label className="text-textMain font-mono">Content (Markdown)</Label>
+                  <Label className="text-textMain font-mono">XP Reward *</Label>
+                  <Input
+                    type="number"
+                    value={formData.xp_reward}
+                    onChange={(e) => setFormData({...formData, xp_reward: parseInt(e.target.value) || 100})}
+                    className="bg-black/50 border-white/20 text-white"
+                    data-testid="room-xp-input"
+                  />
+                </div>
+                
+                <div className="border border-primary/30 p-4 rounded-sm bg-primary/5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <input
+                      type="checkbox"
+                      checked={formData.has_lab}
+                      onChange={(e) => setFormData({...formData, has_lab: e.target.checked})}
+                      className="w-5 h-5"
+                      id="has-lab-checkbox"
+                    />
+                    <Label htmlFor="has-lab-checkbox" className="text-primary font-mono font-bold text-lg cursor-pointer">
+                      Enable Interactive Lab (Docker Container)
+                    </Label>
+                  </div>
+                  
+                  {formData.has_lab && (
+                    <div className="space-y-3 mt-4">
+                      <div>
+                        <Label className="text-textMain font-mono text-sm">Docker Image *</Label>
+                        <Input
+                          value={formData.docker_image}
+                          onChange={(e) => setFormData({...formData, docker_image: e.target.value})}
+                          className="bg-black/50 border-white/20 text-white font-mono"
+                          placeholder="e.g., ubuntu:20.04, kalilinux/kali-rolling, mysql:latest"
+                        />
+                        <p className="text-xs text-textMuted mt-1">Container image to use for this lab</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div>
+                  <Label className="text-textMain font-mono">Learning Content (Markdown) *</Label>
                   <Textarea
                     value={formData.content}
                     onChange={(e) => setFormData({...formData, content: e.target.value})}
-                    className="bg-black/50 border-white/20 text-white min-h-[200px]"
+                    className="bg-black/50 border-white/20 text-white font-mono text-sm min-h-[200px]"
+                    placeholder="# Challenge Title\n\n## Introduction\nExplain the challenge...\n\n## Tasks\n1. First task\n2. Second task\n\n## Hints\n- Hint 1\n- Hint 2"
                     data-testid="room-content-input"
                   />
+                  <p className="text-xs text-textMuted mt-1">Use Markdown format for formatting</p>
                 </div>
+                
+                <div>
+                  <Label className="text-textMain font-mono">Tasks (One per line) *</Label>
+                  <Textarea
+                    value={formData.tasks}
+                    onChange={(e) => setFormData({...formData, tasks: e.target.value})}
+                    className="bg-black/50 border-white/20 text-white"
+                    placeholder="Find the hidden file\nExtract the password\nCapture the flag"
+                    rows={4}
+                  />
+                  <p className="text-xs text-textMuted mt-1">Each line will be a separate task</p>
+                </div>
+                
+                <div>
+                  <Label className="text-textMain font-mono">Flags (Comma separated) *</Label>
+                  <Input
+                    value={formData.flags}
+                    onChange={(e) => setFormData({...formData, flags: e.target.value})}
+                    className="bg-black/50 border-white/20 text-white font-mono"
+                    placeholder="FLAG{example_flag_1}, FLAG{another_flag_2}"
+                  />
+                  <p className="text-xs text-textMuted mt-1">Users need to submit these flags to complete the room</p>
+                </div>
+                
                 <Button 
                   onClick={handleSubmit}
                   className="w-full bg-primary text-black hover:bg-primaryDim font-bold uppercase tracking-wider"
