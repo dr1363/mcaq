@@ -292,7 +292,14 @@ function usageIsCompositePortal({
         if (/^[A-Z]/.test(name || "")) {
           const innerBinding = op.scope.getBinding(name);
           if (innerBinding && innerBinding.path) {
-            innerBinding.path.traverse(this.visitors);
+            innerBinding.path.traverse({
+              JSXOpeningElement(innerOp) {
+                const innerName = jsxNameOf(innerOp.node, t);
+                if (isPortalishName(innerName, RADIX_ROOTS)) {
+                  hit = true;
+                }
+              }
+            });
           }
         }
       },
