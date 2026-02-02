@@ -388,7 +388,7 @@ async def submit_flag(request: SubmitFlagRequest, current_user: dict = Depends(g
         if not progress:
             progress = UserProgress(
                 user_id=current_user['id'],
-                room_id=room_id,
+                room_id=request.room_id,
                 completed=True
             )
             progress_dict = progress.model_dump()
@@ -399,7 +399,7 @@ async def submit_flag(request: SubmitFlagRequest, current_user: dict = Depends(g
             new_xp = current_user['xp'] + room.get('xp_reward', 100)
             await db.users.update_one(
                 {'id': current_user['id']},
-                {'$set': {'xp': new_xp}, '$push': {'completed_rooms': room_id}}
+                {'$set': {'xp': new_xp}, '$push': {'completed_rooms': request.room_id}}
             )
             
             return {'correct': True, 'message': 'Flag correct! Room completed!', 'xp_earned': room.get('xp_reward', 100)}
