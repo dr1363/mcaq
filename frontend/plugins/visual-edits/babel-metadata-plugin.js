@@ -933,7 +933,7 @@ const babelMetadataPlugin = ({ types: t }) => {
   /**
    * Detects if we're inside an array iteration (.map(), etc.) and extracts context
    */
-  function getArrayIterationContext(exprPath, state, depth = 0) {
+  function getArrayIterationContext(exprPath, state, depth = 0, visitedPaths = new Set()) {
     // Prevent infinite recursion with depth limit
     if (depth > 10) {
       return null;
