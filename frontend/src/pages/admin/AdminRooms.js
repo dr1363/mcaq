@@ -172,19 +172,31 @@ const AdminRooms = () => {
             <h1 className="text-4xl font-heading font-bold text-accent mb-2 glow-text" data-testid="admin-rooms-title">
               ROOM MANAGEMENT
             </h1>
-            <p className="text-textMuted font-mono">Create and manage learning rooms</p>
+            <p className="text-textMuted font-mono">Create cybersecurity labs or programming challenges</p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button 
-                onClick={() => { setEditingRoom(null); resetForm(); }}
-                className="bg-accent text-white hover:bg-accent/80 font-bold uppercase tracking-wider"
-                data-testid="create-room-button"
-              >
-                <Plus className="w-5 h-5 mr-2" />
-                Create Room
-              </Button>
-            </DialogTrigger>
+          <div className="flex gap-3">
+            <Button 
+              onClick={() => { setRoomType('cybersecurity'); setEditingRoom(null); resetForm(); setIsDialogOpen(true); }}
+              className="bg-accent text-white hover:bg-accent/80 font-bold uppercase tracking-wider"
+              data-testid="create-cyber-room-button"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Create Cybersecurity Room
+            </Button>
+            <Button 
+              onClick={() => { setRoomType('programming'); setEditingRoom(null); resetForm(); setIsDialogOpen(true); }}
+              className="bg-primary text-black hover:bg-primaryDim font-bold uppercase tracking-wider"
+              data-testid="create-prog-room-button"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Create Programming Room
+            </Button>
+          </div>
+        </div>
+
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+          </DialogTrigger>
             <DialogContent className="max-w-2xl bg-surface border-white/10">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-heading text-primary">
