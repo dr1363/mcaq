@@ -6,8 +6,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Terminal, Play, Flag, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+// Markdown rendering temporarily simplified
 
 const RoomDetail = () => {
   const { roomId } = useParams();
