@@ -371,6 +371,17 @@ const AdminRooms = () => {
           </Dialog>
         </div>
 
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="max-w-3xl bg-surface border-white/10 max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-heading text-primary">
+                {editingRoom ? 'Edit Room' : roomType === 'cybersecurity' ? 'Create Cybersecurity Room' : 'Create Programming Challenge'}
+              </DialogTitle>
+              <p className="text-sm text-textMuted font-mono">
+                {roomType === 'cybersecurity' ? 'CTF challenges, labs, and security exercises' : 'Code practice and programming exercises'}
+              </p>
+            </DialogHeader>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {rooms.map((room, idx) => (
             <div key={room.id} className="cyber-card p-6 rounded-sm" data-testid={`room-card-${idx}`}>
