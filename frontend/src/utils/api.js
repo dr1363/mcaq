@@ -43,7 +43,7 @@ export const labAPI = {
 };
 
 export const flagAPI = {
-  submit: (roomId, flag) => api.post('/flags/submit', { flag }, { params: { room_id: roomId } }),
+  submit: (data) => api.post('/flags/submit', data),
 };
 
 export const challengeAPI = {
