@@ -520,6 +520,84 @@ async def delete_user(user_id: str, current_user: dict = Depends(get_current_use
         raise HTTPException(status_code=404, detail="User not found")
     return {'message': 'User deleted'}
 
+@api_router.post("/admin/upload-lab-files")
+async def upload_lab_files(
+    room_id: str,
+    files: List[UploadFile] = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    # Create room-specific directory
+    room_dir = UPLOAD_DIR / room_id
+    room_dir.mkdir(exist_ok=True)
+    
+    uploaded_files = []
+    
+    for file in files:
+        try:
+            # Save file
+            file_path = room_dir / file.filename
+            with open(file_path, 'wb') as buffer:
+                shutil.copyfileobj(file.file, buffer)
+            
+            uploaded_files.append({
+                'filename': file.filename,
+                'path': str(file_path),
+                'size': os.path.getsize(file_path)
+            })
+            
+            logger.info(f"Uploaded file: {file.filename} for room {room_id}")
+        except Exception as e:
+            logger.error(f"Error uploading file {file.filename}: {e}")
+            raise HTTPException(status_code=500, detail=f"Failed to upload {file.filename}")
+    
+    # Update room with uploaded files info
+    await db.rooms.update_one(
+        {'id': room_id},
+        {'$set': {'uploaded_files': uploaded_files}}
+    )
+    
+    return {
+        'message': f'Successfully uploaded {len(uploaded_files)} file(s)',
+        'files': uploaded_files
+    }
+
+@api_router.get("/admin/lab-files/{room_id}")
+async def get_lab_files(room_id: str, current_user: dict = Depends(get_current_user)):
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    room = await db.rooms.find_one({'id': room_id}, {'_id': 0})
+    if not room:
+        raise HTTPException(status_code=404, detail="Room not found")
+    
+    return room.get('uploaded_files', [])
+
+@api_router.delete("/admin/lab-files/{room_id}/{filename}")
+async def delete_lab_file(room_id: str, filename: str, current_user: dict = Depends(get_current_user)):
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    file_path = UPLOAD_DIR / room_id / filename
+    
+    if file_path.exists():
+        os.remove(file_path)
+        
+        # Update room's uploaded files list
+        room = await db.rooms.find_one({'id': room_id}, {'_id': 0})
+        if room and 'uploaded_files' in room:
+            updated_files = [f for f in room['uploaded_files'] if f['filename'] != filename]
+            await db.rooms.update_one(
+                {'id': room_id},
+                {'$set': {'uploaded_files': updated_files}}
+            )
+        
+        return {'message': f'File {filename} deleted'}
+    else:
+        raise HTTPException(status_code=404, detail="File not found")
+
 @api_router.get("/admin/stats")
 async def get_admin_stats(current_user: dict = Depends(get_current_user)):
     if current_user['role'] != 'admin':
