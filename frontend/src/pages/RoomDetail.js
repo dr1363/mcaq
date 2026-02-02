@@ -19,7 +19,10 @@ const RoomDetail = () => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchRoom();
+    if (roomId) {
+      fetchRoom();
+    }
+    // eslint-disable-next-line
   }, [roomId]);
 
   const fetchRoom = async () => {
