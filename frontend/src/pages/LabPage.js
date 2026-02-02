@@ -170,6 +170,7 @@ const LabPage = () => {
               <div 
                 ref={terminalRef} 
                 className="h-[calc(100%-40px)] bg-black p-2"
+                style={{ minHeight: '600px' }}
                 data-testid="terminal-container"
               />
             </div>
