@@ -621,13 +621,20 @@ const babelMetadataPlugin = ({ types: t }) => {
   /**
    * Analyzes a member expression like item.name or obj.prop.value
    */
-  function analyzeMemberExpression(exprPath, state, depth = 0) {
+  function analyzeMemberExpression(exprPath, state, depth = 0, visitedPaths = new Set()) {
     const node = exprPath.node;
     
     // Prevent infinite recursion with depth limit
     if (depth > 10) {
       return { type: "unknown", isEditable: false };
     }
+    
+    // Prevent re-analyzing the same path
+    const pathKey = `${exprPath.node.start}_${exprPath.node.end}`;
+    if (visitedPaths.has(pathKey)) {
+      return { type: "unknown", isEditable: false };
+    }
+    visitedPaths.add(pathKey);
 
     // Build the property path (e.g., "name" or "address.city")
     const propPath = buildPropertyPath(node);
