@@ -145,10 +145,8 @@ const RoomDetail = () => {
                 <Terminal className="w-6 h-6 text-primary" />
                 Room Content
               </h2>
-              <div className="prose prose-invert max-w-none text-textMuted" data-testid="room-content">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {room.content || 'No content available for this room.'}
-                </ReactMarkdown>
+              <div className="prose prose-invert max-w-none text-textMuted whitespace-pre-wrap" data-testid="room-content">
+                {room.content || 'No content available for this room.'}
               </div>
             </div>
           </div>
