@@ -223,8 +223,8 @@ const AdminRooms = () => {
     setSelectedFiles([]);
   };
 
-  const cyberRooms = rooms.filter(r => r.room_type !== 'programming');
-  const progRooms = rooms.filter(r => r.room_type === 'programming');
+  const cyberRooms = Array.isArray(rooms) ? rooms.filter(r => r.room_type !== 'programming') : [];
+  const progRooms = Array.isArray(rooms) ? rooms.filter(r => r.room_type === 'programming') : [];
 
   if (loading) {
     return (
