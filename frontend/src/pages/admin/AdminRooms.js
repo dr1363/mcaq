@@ -69,7 +69,11 @@ const AdminRooms = () => {
 
   const handleEdit = (room) => {
     setEditingRoom(room);
-    setFormData(room);
+    setFormData({
+      ...room,
+      flags: room.flags ? room.flags.join(', ') : '',
+      tasks: room.tasks ? room.tasks.map(t => t.description || t.title || t).join('\n') : ''
+    });
     setIsDialogOpen(true);
   };
 
