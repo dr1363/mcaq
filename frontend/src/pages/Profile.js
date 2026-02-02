@@ -12,6 +12,7 @@ const Profile = () => {
 
   useEffect(() => {
     fetchProfile();
+    // eslint-disable-next-line
   }, [userId]);
 
   const fetchProfile = async () => {
@@ -46,6 +47,9 @@ const Profile = () => {
       </div>
     );
   }
+
+  const badges = profile.badges || [];
+  const achievements = profile.achievements || [];
 
   return (
     <div className="min-h-screen bg-background" data-testid="profile-page">
@@ -94,7 +98,7 @@ const Profile = () => {
           <div className="cyber-card p-6 rounded-sm" data-testid="stat-badges">
             <div className="flex items-center justify-between mb-2">
               <Award className="w-8 h-8 text-primary" />
-              <span className="text-3xl font-heading font-bold text-primary">{profile.badges?.length || 0}</span>
+              <span className="text-3xl font-heading font-bold text-primary">{badges.length}</span>
             </div>
             <div className="text-sm font-mono text-textMuted uppercase">Badges Earned</div>
           </div>
@@ -102,7 +106,7 @@ const Profile = () => {
           <div className="cyber-card p-6 rounded-sm" data-testid="stat-achievements">
             <div className="flex items-center justify-between mb-2">
               <Trophy className="w-8 h-8 text-secondary" />
-              <span className="text-3xl font-heading font-bold text-secondary">{profile.achievements?.length || 0}</span>
+              <span className="text-3xl font-heading font-bold text-secondary">{achievements.length}</span>
             </div>
             <div className="text-sm font-mono text-textMuted uppercase">Achievements</div>
           </div>
@@ -114,10 +118,10 @@ const Profile = () => {
               <Award className="w-6 h-6 text-primary" />
               Badges
             </h2>
-            {profile.badges && profile.badges.length > 0 ? (
+            {badges.length > 0 ? (
               <div className="grid grid-cols-3 gap-3">
-                {profile.badges.map((badge, idx) => (
-                  <div key={idx} className="bg-white/5 p-3 rounded-sm text-center" data-testid={`badge-${idx}`}>
+                {badges.slice(0, 6).map((badge, idx) => (
+                  <div key={`badge-${idx}`} className="bg-white/5 p-3 rounded-sm text-center" data-testid={`badge-${idx}`}>
                     <div className="text-2xl mb-1">🏆</div>
                     <div className="text-xs font-mono text-textMuted">{badge}</div>
                   </div>
@@ -133,10 +137,10 @@ const Profile = () => {
               <Trophy className="w-6 h-6 text-primary" />
               Achievements
             </h2>
-            {profile.achievements && profile.achievements.length > 0 ? (
+            {achievements.length > 0 ? (
               <div className="space-y-2">
-                {profile.achievements.map((achievement, idx) => (
-                  <div key={idx} className="bg-white/5 p-3 rounded-sm" data-testid={`achievement-${idx}`}>
+                {achievements.slice(0, 5).map((achievement, idx) => (
+                  <div key={`ach-${idx}`} className="bg-white/5 p-3 rounded-sm" data-testid={`achievement-${idx}`}>
                     <div className="flex items-center gap-3">
                       <div className="text-xl">✨</div>
                       <div className="text-sm font-mono text-textMain">{achievement}</div>

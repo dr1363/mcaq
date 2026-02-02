@@ -6,7 +6,6 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Terminal, Play, Flag, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
-// Markdown rendering temporarily simplified
 
 const RoomDetail = () => {
   const { roomId } = useParams();
@@ -38,7 +37,7 @@ const RoomDetail = () => {
   const handleStartLab = async () => {
     setStartingLab(true);
     try {
-      const response = await labAPI.start(roomId);
+      const response = await labAPI.start({ room_id: roomId });
       toast.success('Lab started! Launching terminal...');
       navigate(`/lab/${response.data.id}`);
     } catch (error) {
@@ -52,7 +51,7 @@ const RoomDetail = () => {
     if (!flag.trim()) return;
     setSubmitting(true);
     try {
-      const response = await flagAPI.submit(roomId, flag);
+      const response = await flagAPI.submit({ room_id: roomId, flag: flag });
       if (response.data.correct) {
         toast.success(response.data.message);
         if (response.data.xp_earned) {
@@ -91,6 +90,8 @@ const RoomDetail = () => {
       </div>
     );
   }
+
+  const tasks = room.tasks || [];
 
   return (
     <div className="min-h-screen bg-background" data-testid="room-detail-page">
@@ -145,7 +146,7 @@ const RoomDetail = () => {
                 <Terminal className="w-6 h-6 text-primary" />
                 Room Content
               </h2>
-              <div className="prose prose-invert max-w-none text-textMuted whitespace-pre-wrap" data-testid="room-content">
+              <div className="text-textMuted whitespace-pre-wrap" data-testid="room-content">
                 {room.content || 'No content available for this room.'}
               </div>
             </div>
@@ -177,15 +178,15 @@ const RoomDetail = () => {
               </div>
             </div>
 
-            {room.tasks && room.tasks.length > 0 && (
+            {tasks.length > 0 && (
               <div className="cyber-card p-6 rounded-sm">
                 <h3 className="text-xl font-heading font-bold text-textMain mb-4 flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-primary" />
-                  Tasks ({room.tasks.length})
+                  Tasks ({tasks.length})
                 </h3>
                 <div className="space-y-3">
-                  {room.tasks.map((task, idx) => (
-                    <div key={idx} className="flex items-start gap-3 p-3 bg-white/5 rounded-sm" data-testid={`task-${idx}`}>
+                  {tasks.slice(0, 10).map((task, idx) => (
+                    <div key={`task-${idx}`} className="flex items-start gap-3 p-3 bg-white/5 rounded-sm" data-testid={`task-${idx}`}>
                       <div className="text-primary font-mono text-sm mt-1">{idx + 1}.</div>
                       <div className="flex-1 text-textMuted text-sm">{task.description || task.title || task}</div>
                     </div>
