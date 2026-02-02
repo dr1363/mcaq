@@ -1,34 +1,52 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+.App {
+  min-height: 100vh;
+  background: #050505;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+.cyber-border {
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: border-color 0.3s;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+.cyber-border:hover {
+  border-color: rgba(0, 255, 65, 0.5);
 }
 
-.App-link {
-    color: #61dafb;
+.cyber-glow {
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+.cyber-button {
+  background: #00ff41;
+  color: #000;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: all 0.2s;
+  border: none;
+  clip-path: polygon(0 0, 100% 0, 100% 80%, 90% 100%, 0 100%);
+}
+
+.cyber-button:hover {
+  box-shadow: 0 0 15px rgba(0, 255, 65, 0.6);
+  background: #00cc33;
+}
+
+.cyber-card {
+  background: rgba(10, 10, 10, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s;
+}
+
+.cyber-card:hover {
+  border-color: rgba(0, 255, 65, 0.3);
+  transform: translateY(-2px);
+}
+
+.terminal-bg {
+  background: #000;
+  font-family: 'JetBrains Mono', monospace;
+  color: #00ff41;
 }
