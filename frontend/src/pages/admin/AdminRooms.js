@@ -284,6 +284,29 @@ const AdminRooms = () => {
                         />
                         <p className="text-xs text-textMuted mt-1">Container image to use for this lab</p>
                       </div>
+                      
+                      <div className="border border-secondary/30 p-3 rounded-sm bg-secondary/5">
+                        <Label className="text-secondary font-mono text-sm font-bold mb-2 block">Upload Lab Files 📁</Label>
+                        <input
+                          type="file"
+                          multiple
+                          onChange={(e) => setSelectedFiles(Array.from(e.target.files))}
+                          className="w-full text-sm text-textMuted file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-secondary file:text-black hover:file:bg-secondary/80 cursor-pointer"
+                        />
+                        <p className="text-xs text-textMuted mt-2">
+                          Upload: Dockerfile, vulnerable apps, CTF challenge files, configs, scripts
+                        </p>
+                        {selectedFiles.length > 0 && (
+                          <div className="mt-2">
+                            <p className="text-xs text-secondary font-bold">Selected files:</p>
+                            <ul className="text-xs text-textMuted mt-1">
+                              {selectedFiles.map((file, idx) => (
+                                <li key={idx} className="truncate">• {file.name} ({(file.size / 1024).toFixed(2)} KB)</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
