@@ -14,6 +14,7 @@ const AdminRooms = () => {
   const [loading, setLoading] = useState(true);
   const [editingRoom, setEditingRoom] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [roomType, setRoomType] = useState('cybersecurity'); // cybersecurity or programming
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [formData, setFormData] = useState({
