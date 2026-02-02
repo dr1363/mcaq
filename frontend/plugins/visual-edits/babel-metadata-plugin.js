@@ -644,7 +644,7 @@ const babelMetadataPlugin = ({ types: t }) => {
       const rootName = rootObj.name;
 
       // Check if we're inside an array iteration (like .map())
-      const arrayContext = getArrayIterationContext(exprPath, state);
+      const arrayContext = getArrayIterationContext(exprPath, state, depth + 1);
 
       if (arrayContext && arrayContext.itemParam === rootName) {
         // This is item.property where item comes from array.map(item => ...)
