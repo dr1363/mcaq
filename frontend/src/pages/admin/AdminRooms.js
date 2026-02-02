@@ -18,11 +18,8 @@ const AdminRooms = () => {
   const [roomType, setRoomType] = useState('cybersecurity');
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
-  
-  // Flags/Questions management
-  const [currentRoomId, setCurrentRoomId] = useState(null);
-  const [roomFlags, setRoomFlags] = useState([]);
-  const [newFlag, setNewFlag] = useState({ question: '', correct_answer: '', points: 10 });
+  const [roomQuestions, setRoomQuestions] = useState([]);
+  const [newQuestion, setNewQuestion] = useState({ question: '', correct_answer: '', points: 10 });
   
   const [formData, setFormData] = useState({
     title: '',
