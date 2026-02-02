@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard';
 import RoadmapsPage from './pages/RoadmapsPage';
 import RoomDetail from './pages/RoomDetail';
 import LabPage from './pages/LabPage';
+import WebLabPage from './pages/WebLabPage';
 import ChallengesPage from './pages/ChallengesPage';
 import CodeEditor from './pages/CodeEditor';
 import Profile from './pages/Profile';
