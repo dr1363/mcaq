@@ -293,7 +293,7 @@ async def start_lab(request: StartLabRequest, background_tasks: BackgroundTasks,
                 mem_limit='512m',
                 cpus=1.0,
                 name=f"lab-{session.id}",
-                labels={'user_id': current_user['id'], 'room_id': room_id},
+                labels={'user_id': current_user['id'], 'room_id': request.room_id},
                 remove=False
             )
             session.container_id = container.id
