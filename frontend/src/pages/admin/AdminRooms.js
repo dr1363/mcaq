@@ -4,7 +4,7 @@ import { roomAPI } from '../../utils/api';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Textarea } from '../../components/ui/textarea';
-import { BookOpen, Plus, Edit, Trash2 } from 'lucide-react';
+import { BookOpen, Plus, Edit, Trash2, Shield, Code } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../components/ui/dialog';
 import { Label } from '../../components/ui/label';
@@ -14,7 +14,7 @@ const AdminRooms = () => {
   const [loading, setLoading] = useState(true);
   const [editingRoom, setEditingRoom] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [roomType, setRoomType] = useState('cybersecurity'); // cybersecurity or programming
+  const [roomType, setRoomType] = useState('cybersecurity');
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [formData, setFormData] = useState({
@@ -25,9 +25,12 @@ const AdminRooms = () => {
     content: '',
     xp_reward: 100,
     has_lab: false,
+    lab_type: 'terminal',
     docker_image: 'ubuntu:20.04',
+    code_language: 'python',
     flags: '',
-    tasks: ''
+    tasks: '',
+    room_type: 'cybersecurity'
   });
 
   useEffect(() => {
@@ -47,11 +50,13 @@ const AdminRooms = () => {
 
   const handleSubmit = async () => {
     try {
-      // Parse flags and tasks from comma-separated strings to arrays
       const roomData = {
         ...formData,
-        flags: formData.flags ? formData.flags.split(',').map(f => f.trim()).filter(f => f) : [],
-        tasks: formData.tasks ? formData.tasks.split('\n').map(t => t.trim()).filter(t => t).map(task => ({ description: task })) : []
+        room_type: roomType,
+        flags: roomType === 'cybersecurity' ? (formData.flags ? formData.flags.split(',').map(f => f.trim()).filter(f => f) : []) : [],
+        tasks: roomType === 'cybersecurity' ? (formData.tasks ? formData.tasks.split('\n').map(t => t.trim()).filter(t => t).map(task => ({ description: task })) : []) : [],
+        has_lab: roomType === 'programming' ? true : formData.has_lab,
+        lab_type: roomType === 'programming' ? 'code_editor' : formData.lab_type
       };
       
       let roomId;
@@ -65,7 +70,6 @@ const AdminRooms = () => {
         toast.success('Room created successfully');
       }
       
-      // Upload files if any selected
       if (selectedFiles.length > 0 && roomId) {
         await handleFileUpload(roomId);
       }
@@ -116,6 +120,7 @@ const AdminRooms = () => {
 
   const handleEdit = (room) => {
     setEditingRoom(room);
+    setRoomType(room.room_type || 'cybersecurity');
     setFormData({
       ...room,
       flags: room.flags ? room.flags.join(', ') : '',
@@ -145,11 +150,17 @@ const AdminRooms = () => {
       content: '',
       xp_reward: 100,
       has_lab: false,
+      lab_type: 'terminal',
       docker_image: 'ubuntu:20.04',
+      code_language: 'python',
       flags: '',
-      tasks: ''
+      tasks: '',
+      room_type: 'cybersecurity'
     });
   };
+
+  const cyberRooms = rooms.filter(r => r.room_type !== 'programming');
+  const progRooms = rooms.filter(r => r.room_type === 'programming');
 
   if (loading) {
     return (
@@ -167,51 +178,50 @@ const AdminRooms = () => {
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-heading font-bold text-accent mb-2 glow-text" data-testid="admin-rooms-title">
-              ROOM MANAGEMENT
-            </h1>
-            <p className="text-textMuted font-mono">Create cybersecurity labs or programming challenges</p>
-          </div>
-          <div className="flex gap-3">
-            <Button 
-              onClick={() => { setRoomType('cybersecurity'); setEditingRoom(null); resetForm(); setIsDialogOpen(true); }}
-              className="bg-accent text-white hover:bg-accent/80 font-bold uppercase tracking-wider"
-              data-testid="create-cyber-room-button"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Create Cybersecurity Room
-            </Button>
-            <Button 
-              onClick={() => { setRoomType('programming'); setEditingRoom(null); resetForm(); setIsDialogOpen(true); }}
-              className="bg-primary text-black hover:bg-primaryDim font-bold uppercase tracking-wider"
-              data-testid="create-prog-room-button"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Create Programming Room
-            </Button>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-4xl font-heading font-bold text-accent mb-2 glow-text">ROOM MANAGEMENT</h1>
+          <p className="text-textMuted font-mono">Create cybersecurity labs or programming challenges</p>
         </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-          </DialogTrigger>
-            <DialogContent className="max-w-2xl bg-surface border-white/10">
+        <div className="flex gap-4 mb-8">
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                onClick={() => { setRoomType('cybersecurity'); setEditingRoom(null); resetForm(); }}
+                className="bg-accent text-white hover:bg-accent/80 font-bold uppercase tracking-wider flex-1"
+              >
+                <Shield className="w-5 h-5 mr-2" />
+                Create Cybersecurity Room
+              </Button>
+            </DialogTrigger>
+            <DialogTrigger asChild>
+              <Button 
+                onClick={() => { setRoomType('programming'); setEditingRoom(null); resetForm(); }}
+                className="bg-primary text-black hover:bg-primaryDim font-bold uppercase tracking-wider flex-1"
+              >
+                <Code className="w-5 h-5 mr-2" />
+                Create Programming Challenge
+              </Button>
+            </DialogTrigger>
+            
+            <DialogContent className="max-w-3xl bg-surface border-white/10 max-h-[85vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-heading text-primary">
-                  {editingRoom ? 'Edit Room' : 'Create New Room'}
+                <DialogTitle className="text-2xl font-heading" style={{color: roomType === 'programming' ? '#00ff41' : '#ff003c'}}>
+                  {editingRoom ? 'Edit Room' : roomType === 'cybersecurity' ? '🛡️ Create Cybersecurity Room' : '💻 Create Programming Challenge'}
                 </DialogTitle>
+                <p className="text-sm text-textMuted font-mono">
+                  {roomType === 'cybersecurity' ? 'CTF challenges, labs, flags & tasks' : 'Code editor only - No flags or tasks'}
+                </p>
               </DialogHeader>
-              <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+              
+              <div className="space-y-4">
                 <div>
                   <Label className="text-textMain font-mono">Title *</Label>
                   <Input
                     value={formData.title}
                     onChange={(e) => setFormData({...formData, title: e.target.value})}
                     className="bg-black/50 border-white/20 text-white"
-                    placeholder="e.g., SQL Injection Challenge"
-                    data-testid="room-title-input"
+                    placeholder={roomType === 'programming' ? 'e.g., Python Loops Challenge' : 'e.g., SQL Injection Lab'}
                   />
                 </div>
                 
@@ -221,20 +231,17 @@ const AdminRooms = () => {
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
                     className="bg-black/50 border-white/20 text-white"
-                    placeholder="Brief description of the challenge"
                     rows={2}
-                    data-testid="room-description-input"
                   />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-textMain font-mono">Difficulty *</Label>
+                    <Label className="text-textMain font-mono">Difficulty</Label>
                     <select
                       value={formData.difficulty}
                       onChange={(e) => setFormData({...formData, difficulty: e.target.value})}
                       className="w-full bg-black/50 border border-white/20 text-white p-2 rounded"
-                      data-testid="room-difficulty-select"
                     >
                       <option>Beginner</option>
                       <option>Intermediate</option>
@@ -242,186 +249,200 @@ const AdminRooms = () => {
                     </select>
                   </div>
                   <div>
-                    <Label className="text-textMain font-mono">Category *</Label>
-                    <select
-                      value={formData.category}
-                      onChange={(e) => setFormData({...formData, category: e.target.value})}
-                      className="w-full bg-black/50 border border-white/20 text-white p-2 rounded"
-                    >
-                      <option>General</option>
-                      <option>Web</option>
-                      <option>Networking</option>
-                      <option>Linux</option>
-                      <option>OSINT</option>
-                      <option>Cryptography</option>
-                      <option>Forensics</option>
-                      <option>Reverse Engineering</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div>
-                  <Label className="text-textMain font-mono">XP Reward *</Label>
-                  <Input
-                    type="number"
-                    value={formData.xp_reward}
-                    onChange={(e) => setFormData({...formData, xp_reward: parseInt(e.target.value) || 100})}
-                    className="bg-black/50 border-white/20 text-white"
-                    data-testid="room-xp-input"
-                  />
-                </div>
-                
-                <div className="border border-primary/30 p-4 rounded-sm bg-primary/5">
-                  <div className="flex items-center gap-3 mb-3">
-                    <input
-                      type="checkbox"
-                      checked={formData.has_lab}
-                      onChange={(e) => setFormData({...formData, has_lab: e.target.checked})}
-                      className="w-5 h-5"
-                      id="has-lab-checkbox"
+                    <Label className="text-textMain font-mono">XP Reward</Label>
+                    <Input
+                      type="number"
+                      value={formData.xp_reward}
+                      onChange={(e) => setFormData({...formData, xp_reward: parseInt(e.target.value) || 100})}
+                      className="bg-black/50 border-white/20 text-white"
                     />
-                    <Label htmlFor="has-lab-checkbox" className="text-primary font-mono font-bold text-lg cursor-pointer">
-                      Enable Interactive Lab (Docker Container)
-                    </Label>
                   </div>
-                  
-                  {formData.has_lab && (
-                    <div className="space-y-3 mt-4">
-                      <div>
-                        <Label className="text-textMain font-mono text-sm">Docker Image *</Label>
-                        <Input
-                          value={formData.docker_image}
-                          onChange={(e) => setFormData({...formData, docker_image: e.target.value})}
-                          className="bg-black/50 border-white/20 text-white font-mono"
-                          placeholder="e.g., ubuntu:20.04, kalilinux/kali-rolling, mysql:latest"
+                </div>
+
+                {roomType === 'programming' && (
+                  <div className="border border-primary/30 p-4 rounded-sm bg-primary/5">
+                    <Label className="text-primary font-mono font-bold text-lg mb-3 block">💻 Programming Settings</Label>
+                    <div>
+                      <Label className="text-textMain font-mono text-sm">Programming Language</Label>
+                      <select
+                        value={formData.code_language}
+                        onChange={(e) => setFormData({...formData, code_language: e.target.value})}
+                        className="w-full bg-black/50 border border-white/20 text-white p-2 rounded mt-1"
+                      >
+                        <option value="python">Python</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="bash">Bash</option>
+                      </select>
+                    </div>
+                    <p className="text-xs text-textMuted mt-3">✓ Code editor will open automatically<br/>✓ No flag submission needed</p>
+                  </div>
+                )}
+
+                {roomType === 'cybersecurity' && (
+                  <>
+                    <div className="border border-accent/30 p-4 rounded-sm bg-accent/5">
+                      <div className="flex items-center gap-3 mb-3">
+                        <input
+                          type="checkbox"
+                          checked={formData.has_lab}
+                          onChange={(e) => setFormData({...formData, has_lab: e.target.checked})}
+                          className="w-5 h-5"
+                          id="has-lab-checkbox"
                         />
-                        <p className="text-xs text-textMuted mt-1">Container image to use for this lab</p>
+                        <Label htmlFor="has-lab-checkbox" className="text-accent font-mono font-bold text-lg cursor-pointer">
+                          Enable Interactive Lab
+                        </Label>
                       </div>
                       
-                      <div className="border border-secondary/30 p-3 rounded-sm bg-secondary/5">
-                        <Label className="text-secondary font-mono text-sm font-bold mb-2 block">Upload Lab Files 📁</Label>
-                        <input
-                          type="file"
-                          multiple
-                          onChange={(e) => setSelectedFiles(Array.from(e.target.files))}
-                          className="w-full text-sm text-textMuted file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-secondary file:text-black hover:file:bg-secondary/80 cursor-pointer"
-                        />
-                        <p className="text-xs text-textMuted mt-2">
-                          Upload: Dockerfile, vulnerable apps, CTF challenge files, configs, scripts
-                        </p>
-                        {selectedFiles.length > 0 && (
-                          <div className="mt-2">
-                            <p className="text-xs text-secondary font-bold">Selected files:</p>
-                            <ul className="text-xs text-textMuted mt-1">
-                              {selectedFiles.map((file, idx) => (
-                                <li key={idx} className="truncate">• {file.name} ({(file.size / 1024).toFixed(2)} KB)</li>
-                              ))}
-                            </ul>
+                      {formData.has_lab && (
+                        <div className="space-y-3 mt-4">
+                          <div>
+                            <Label className="text-textMain font-mono text-sm">Lab Type</Label>
+                            <select
+                              value={formData.lab_type}
+                              onChange={(e) => setFormData({...formData, lab_type: e.target.value})}
+                              className="w-full bg-black/50 border border-white/20 text-white p-2 rounded"
+                            >
+                              <option value="terminal">Terminal (Linux/Network)</option>
+                              <option value="web">Web Challenge (SQL/XSS)</option>
+                            </select>
                           </div>
-                        )}
-                      </div>
+                          
+                          <div>
+                            <Label className="text-textMain font-mono text-sm">Docker Image</Label>
+                            <Input
+                              value={formData.docker_image}
+                              onChange={(e) => setFormData({...formData, docker_image: e.target.value})}
+                              className="bg-black/50 border-white/20 text-white font-mono"
+                              placeholder="ubuntu:20.04"
+                            />
+                          </div>
+                          
+                          <div className="border border-secondary/30 p-3 rounded-sm bg-secondary/5">
+                            <Label className="text-secondary font-mono text-sm font-bold mb-2 block">Upload Lab Files 📁</Label>
+                            <input
+                              type="file"
+                              multiple
+                              onChange={(e) => setSelectedFiles(Array.from(e.target.files))}
+                              className="w-full text-sm text-textMuted file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-secondary file:text-black hover:file:bg-secondary/80 cursor-pointer"
+                            />
+                            {selectedFiles.length > 0 && (
+                              <div className="mt-2">
+                                <p className="text-xs text-secondary font-bold">Selected: {selectedFiles.length} files</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+                    
+                    <div>
+                      <Label className="text-textMain font-mono">Tasks (One per line)</Label>
+                      <Textarea
+                        value={formData.tasks}
+                        onChange={(e) => setFormData({...formData, tasks: e.target.value})}
+                        className="bg-black/50 border-white/20 text-white"
+                        placeholder="Find the hidden file\nExtract the password\nCapture the flag"
+                        rows={4}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label className="text-textMain font-mono">Flags (Comma separated)</Label>
+                      <Input
+                        value={formData.flags}
+                        onChange={(e) => setFormData({...formData, flags: e.target.value})}
+                        className="bg-black/50 border-white/20 text-white font-mono"
+                        placeholder="FLAG{example1}, FLAG{example2}"
+                      />
+                    </div>
+                  </>
+                )}
                 
                 <div>
-                  <Label className="text-textMain font-mono">Learning Content (Markdown) *</Label>
+                  <Label className="text-textMain font-mono">Content (Markdown)</Label>
                   <Textarea
                     value={formData.content}
                     onChange={(e) => setFormData({...formData, content: e.target.value})}
-                    className="bg-black/50 border-white/20 text-white font-mono text-sm min-h-[200px]"
-                    placeholder="# Challenge Title\n\n## Introduction\nExplain the challenge...\n\n## Tasks\n1. First task\n2. Second task\n\n## Hints\n- Hint 1\n- Hint 2"
-                    data-testid="room-content-input"
+                    className="bg-black/50 border-white/20 text-white font-mono text-sm min-h-[150px]"
+                    placeholder="# Challenge Title\n\n## Description\nWrite your content here..."
                   />
-                  <p className="text-xs text-textMuted mt-1">Use Markdown format for formatting</p>
-                </div>
-                
-                <div>
-                  <Label className="text-textMain font-mono">Tasks (One per line) *</Label>
-                  <Textarea
-                    value={formData.tasks}
-                    onChange={(e) => setFormData({...formData, tasks: e.target.value})}
-                    className="bg-black/50 border-white/20 text-white"
-                    placeholder="Find the hidden file\nExtract the password\nCapture the flag"
-                    rows={4}
-                  />
-                  <p className="text-xs text-textMuted mt-1">Each line will be a separate task</p>
-                </div>
-                
-                <div>
-                  <Label className="text-textMain font-mono">Flags (Comma separated) *</Label>
-                  <Input
-                    value={formData.flags}
-                    onChange={(e) => setFormData({...formData, flags: e.target.value})}
-                    className="bg-black/50 border-white/20 text-white font-mono"
-                    placeholder="FLAG{example_flag_1}, FLAG{another_flag_2}"
-                  />
-                  <p className="text-xs text-textMuted mt-1">Users need to submit these flags to complete the room</p>
                 </div>
                 
                 <Button 
                   onClick={handleSubmit}
-                  className="w-full bg-primary text-black hover:bg-primaryDim font-bold uppercase tracking-wider"
-                  data-testid="submit-room-button"
+                  className="w-full font-bold uppercase tracking-wider"
+                  style={{backgroundColor: roomType === 'programming' ? '#00ff41' : '#ff003c', color: '#000'}}
                 >
-                  {editingRoom ? 'Update Room' : 'Create Room'}
+                  {editingRoom ? 'Update' : 'Create'} {roomType === 'programming' ? 'Programming Challenge' : 'Cybersecurity Room'}
                 </Button>
               </div>
             </DialogContent>
           </Dialog>
         </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-w-3xl bg-surface border-white/10 max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-heading text-primary">
-                {editingRoom ? 'Edit Room' : roomType === 'cybersecurity' ? 'Create Cybersecurity Room' : 'Create Programming Challenge'}
-              </DialogTitle>
-              <p className="text-sm text-textMuted font-mono">
-                {roomType === 'cybersecurity' ? 'CTF challenges, labs, and security exercises' : 'Code practice and programming exercises'}
-              </p>
-            </DialogHeader>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {rooms.map((room, idx) => (
-            <div key={room.id} className="cyber-card p-6 rounded-sm" data-testid={`room-card-${idx}`}>
-              <div className="flex items-start justify-between mb-4">
-                <BookOpen className="w-8 h-8 text-primary" />
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => handleEdit(room)}
-                    variant="ghost"
-                    size="sm"
-                    className="text-secondary hover:bg-secondary/10"
-                    data-testid={`edit-room-${idx}`}
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    onClick={() => handleDelete(room.id, room.title)}
-                    variant="ghost"
-                    size="sm"
-                    className="text-accent hover:bg-accent/10"
-                    data-testid={`delete-room-${idx}`}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+        <div className="space-y-8">
+          <div>
+            <h2 className="text-2xl font-heading font-bold text-accent mb-4 flex items-center gap-2">
+              <Shield className="w-6 h-6" />
+              Cybersecurity Rooms ({cyberRooms.length})
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {cyberRooms.map((room, idx) => (
+                <div key={room.id} className="cyber-card p-6 rounded-sm">
+                  <div className="flex items-start justify-between mb-4">
+                    <BookOpen className="w-8 h-8 text-accent" />
+                    <div className="flex gap-2">
+                      <Button onClick={() => handleEdit(room)} variant="ghost" size="sm" className="text-secondary hover:bg-secondary/10">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button onClick={() => handleDelete(room.id, room.title)} variant="ghost" size="sm" className="text-accent hover:bg-accent/10">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-heading font-bold text-textMain mb-2">{room.title}</h3>
+                  <p className="text-textMuted text-sm mb-4 line-clamp-2">{room.description}</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-mono px-2 py-1 rounded-sm bg-accent/20 text-accent">{room.difficulty}</span>
+                    <span className="text-xs font-mono text-primary">+{room.xp_reward} XP</span>
+                    {room.has_lab && <span className="text-xs font-mono text-secondary">🚀 Lab</span>}
+                  </div>
                 </div>
-              </div>
-              <h3 className="text-xl font-heading font-bold text-textMain mb-2">{room.title}</h3>
-              <p className="text-textMuted text-sm mb-4 line-clamp-2">{room.description}</p>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className={`text-xs font-mono px-2 py-1 rounded-sm ${
-                  room.difficulty === 'Beginner' ? 'bg-primary/20 text-primary' :
-                  room.difficulty === 'Intermediate' ? 'bg-secondary/20 text-secondary' :
-                  'bg-accent/20 text-accent'
-                }`}>
-                  {room.difficulty}
-                </span>
-                <span className="text-xs font-mono text-primary">+{room.xp_reward} XP</span>
-              </div>
+              ))}
             </div>
-          ))}
+          </div>
+
+          <div>
+            <h2 className="text-2xl font-heading font-bold text-primary mb-4 flex items-center gap-2">
+              <Code className="w-6 h-6" />
+              Programming Challenges ({progRooms.length})
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {progRooms.map((room, idx) => (
+                <div key={room.id} className="cyber-card p-6 rounded-sm border-primary/30">
+                  <div className="flex items-start justify-between mb-4">
+                    <Code className="w-8 h-8 text-primary" />
+                    <div className="flex gap-2">
+                      <Button onClick={() => handleEdit(room)} variant="ghost" size="sm" className="text-secondary hover:bg-secondary/10">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button onClick={() => handleDelete(room.id, room.title)} variant="ghost" size="sm" className="text-accent hover:bg-accent/10">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-heading font-bold text-textMain mb-2">{room.title}</h3>
+                  <p className="text-textMuted text-sm mb-4 line-clamp-2">{room.description}</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-mono px-2 py-1 rounded-sm bg-primary/20 text-primary">{room.difficulty}</span>
+                    <span className="text-xs font-mono text-primary">+{room.xp_reward} XP</span>
+                    <span className="text-xs font-mono text-secondary uppercase">{room.code_language}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
