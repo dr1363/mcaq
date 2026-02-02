@@ -146,6 +146,18 @@ class SubmitFlagRequest(BaseModel):
     room_id: str
     flag: str
 
+class QuestionModel(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    room_id: str
+    user_id: str
+    username: str
+    question: str
+    reply: Optional[str] = None
+    replied_by: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    replied_at: Optional[datetime] = None
+
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
