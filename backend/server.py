@@ -130,6 +130,13 @@ class SubmitFlagRequest(BaseModel):
     room_id: str
     flag: str
 
+class StartLabRequest(BaseModel):
+    room_id: str
+
+class SubmitFlagRequest(BaseModel):
+    room_id: str
+    flag: str
+
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
