@@ -61,6 +61,7 @@ function AppRoutes() {
       <Route path="/roadmaps" element={<PrivateRoute><RoadmapsPage /></PrivateRoute>} />
       <Route path="/rooms/:roomId" element={<PrivateRoute><RoomDetail /></PrivateRoute>} />
       <Route path="/lab/:sessionId" element={<PrivateRoute><LabPage /></PrivateRoute>} />
+      <Route path="/web-lab/:sessionId" element={<PrivateRoute><WebLabPage /></PrivateRoute>} />
       <Route path="/challenges" element={<PrivateRoute><ChallengesPage /></PrivateRoute>} />
       <Route path="/challenges/:challengeId" element={<PrivateRoute><CodeEditor /></PrivateRoute>} />
       <Route path="/profile/:userId" element={<PrivateRoute><Profile /></PrivateRoute>} />
