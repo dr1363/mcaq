@@ -14,6 +14,8 @@ const AdminRooms = () => {
   const [loading, setLoading] = useState(true);
   const [editingRoom, setEditingRoom] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
