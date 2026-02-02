@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { roomAPI, labAPI, flagAPI } from '../utils/api';
+import { roomAPI, labAPI } from '../utils/api';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import { Textarea } from '../components/ui/textarea';
-import { Terminal, Play, Flag, MessageCircle, Send } from 'lucide-react';
+import { Terminal, Play, Flag, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 
@@ -15,17 +14,16 @@ const RoomDetail = () => {
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
   const [startingLab, setStartingLab] = useState(false);
-  const [flag, setFlag] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [questions, setQuestions] = useState([]);
-  const [newQuestion, setNewQuestion] = useState('');
-  const [askingQuestion, setAskingQuestion] = useState(false);
-  const [activeTab, setActiveTab] = useState('flag');
+  const [roomFlags, setRoomFlags] = useState([]);
+  const [answeredFlags, setAnsweredFlags] = useState([]);
+  const [flagAnswers, setFlagAnswers] = useState({});
+  const [submittingFlag, setSubmittingFlag] = useState(null);
 
   useEffect(() => {
     if (roomId) {
       fetchRoom();
-      fetchQuestions();
+      fetchRoomFlags();
+      fetchAnsweredFlags();
     }
     // eslint-disable-next-line
   }, [roomId]);
@@ -41,16 +39,29 @@ const RoomDetail = () => {
     }
   };
 
-  const fetchQuestions = async () => {
+  const fetchRoomFlags = async () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}/api/questions/${roomId}`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/room-flags/${roomId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setQuestions(response.data);
+      setRoomFlags(response.data);
     } catch (error) {
-      console.error('Failed to load questions');
+      console.error('Failed to load flags');
+    }
+  };
+
+  const fetchAnsweredFlags = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/api/user/answered-flags`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setAnsweredFlags(response.data);
+    } catch (error) {
+      console.error('Failed to load answered flags');
     }
   };
 
@@ -92,46 +103,41 @@ const RoomDetail = () => {
     }
   };
 
-  const handleSubmitFlag = async () => {
-    if (!flag.trim()) return;
-    setSubmitting(true);
+  const handleSubmitAnswer = async (flagId) => {
+    const answer = flagAnswers[flagId];
+    if (!answer || !answer.trim()) {
+      toast.error('Please enter an answer');
+      return;
+    }
+    
+    setSubmittingFlag(flagId);
     try {
-      const response = await flagAPI.submit({ room_id: roomId, flag: flag });
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}/api/room-flags/check?flag_id=${flagId}`,
+        { answer: answer },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
       if (response.data.correct) {
         toast.success(response.data.message);
-        if (response.data.xp_earned) {
-          toast.success(`+${response.data.xp_earned} XP earned!`);
+        if (response.data.points_earned > 0) {
+          toast.success(`+${response.data.points_earned} points earned!`);
         }
-        fetchRoom();
+        setAnsweredFlags([...answeredFlags, flagId]);
+        setFlagAnswers({...flagAnswers, [flagId]: ''});
       } else {
         toast.error(response.data.message);
       }
-      setFlag('');
     } catch (error) {
-      toast.error('Failed to submit flag');
+      toast.error('Failed to submit answer');
     } finally {
-      setSubmitting(false);
+      setSubmittingFlag(null);
     }
   };
 
-  const handleAskQuestion = async () => {
-    if (!newQuestion.trim()) return;
-    setAskingQuestion(true);
-    try {
-      const token = localStorage.getItem('token');
-      await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/api/questions/ask?room_id=${roomId}`,
-        { question: newQuestion },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      toast.success('Question posted!');
-      setNewQuestion('');
-      fetchQuestions();
-    } catch (error) {
-      toast.error('Failed to post question');
-    } finally {
-      setAskingQuestion(false);
-    }
+  const handleAnswerChange = (flagId, value) => {
+    setFlagAnswers({...flagAnswers, [flagId]: value});
   };
 
   if (loading) {
@@ -196,7 +202,7 @@ const RoomDetail = () => {
                 ) : (
                   <span className="flex items-center gap-2">
                     <Play className="w-5 h-5" />
-                    {room.lab_type === 'code_editor' ? 'Open Code Editor' :
+                    {room.lab_type === 'code_editor' || room.room_type === 'programming' ? 'Open Code Editor' :
                      room.lab_type === 'web' ? 'Launch Web Challenge' :
                      'Start Terminal Lab'}
                   </span>
@@ -217,146 +223,10 @@ const RoomDetail = () => {
                 {room.content || 'No content available for this room.'}
               </div>
             </div>
-          </div>
-
-          <div className="lg:col-span-1 space-y-6">
-            {/* Tab Navigation */}
-            <div className="cyber-card rounded-sm overflow-hidden">
-              <div className="flex border-b border-white/10">
-                <button
-                  onClick={() => setActiveTab('flag')}
-                  className={`flex-1 px-4 py-3 font-mono text-sm font-bold uppercase transition-colors ${
-                    activeTab === 'flag' 
-                      ? 'bg-primary/20 text-primary border-b-2 border-primary' 
-                      : 'text-textMuted hover:bg-white/5'
-                  }`}
-                  data-testid="tab-flag"
-                >
-                  <Flag className="w-4 h-4 inline mr-2" />
-                  Submit Flag
-                </button>
-                <button
-                  onClick={() => setActiveTab('questions')}
-                  className={`flex-1 px-4 py-3 font-mono text-sm font-bold uppercase transition-colors ${
-                    activeTab === 'questions' 
-                      ? 'bg-secondary/20 text-secondary border-b-2 border-secondary' 
-                      : 'text-textMuted hover:bg-white/5'
-                  }`}
-                  data-testid="tab-questions"
-                >
-                  <MessageCircle className="w-4 h-4 inline mr-2" />
-                  Q&A ({questions.length})
-                </button>
-              </div>
-
-              {/* Flag Submission Tab */}
-              {activeTab === 'flag' && (
-                <div className="p-6">
-                  <h3 className="text-lg font-heading font-bold text-textMain mb-4 flex items-center gap-2">
-                    <Flag className="w-5 h-5 text-primary" />
-                    Submit Your Flag
-                  </h3>
-                  <div className="space-y-4">
-                    <Input
-                      type="text"
-                      value={flag}
-                      onChange={(e) => setFlag(e.target.value)}
-                      placeholder="FLAG{your_answer_here}"
-                      className="bg-black/50 border-white/20 focus:border-primary text-white font-mono rounded-none"
-                      data-testid="flag-input"
-                    />
-                    <Button
-                      onClick={handleSubmitFlag}
-                      disabled={submitting || !flag.trim()}
-                      className="w-full bg-primary text-black hover:bg-primaryDim font-bold uppercase tracking-wider"
-                      data-testid="submit-flag-button"
-                    >
-                      {submitting ? 'Submitting...' : 'Submit Flag'}
-                    </Button>
-                    <p className="text-xs text-textMuted font-mono">
-                      ⚡ Find the flag in the challenge and submit it here
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Questions Tab */}
-              {activeTab === 'questions' && (
-                <div className="p-6">
-                  <h3 className="text-lg font-heading font-bold text-textMain mb-4 flex items-center gap-2">
-                    <MessageCircle className="w-5 h-5 text-secondary" />
-                    Ask Questions
-                  </h3>
-                  
-                  {/* Ask New Question */}
-                  <div className="space-y-3 mb-6 pb-6 border-b border-white/10">
-                    <Textarea
-                      value={newQuestion}
-                      onChange={(e) => setNewQuestion(e.target.value)}
-                      placeholder="Ask your question about this room..."
-                      className="bg-black/50 border-white/20 focus:border-secondary text-white font-mono rounded-none min-h-[80px]"
-                      data-testid="question-input"
-                    />
-                    <Button
-                      onClick={handleAskQuestion}
-                      disabled={askingQuestion || !newQuestion.trim()}
-                      className="w-full bg-secondary text-black hover:bg-secondary/80 font-bold uppercase tracking-wider"
-                      data-testid="ask-question-button"
-                    >
-                      <Send className="w-4 h-4 mr-2" />
-                      {askingQuestion ? 'Posting...' : 'Post Question'}
-                    </Button>
-                  </div>
-
-                  {/* Questions List */}
-                  <div className="space-y-4 max-h-[400px] overflow-y-auto">
-                    {questions.length > 0 ? (
-                      questions.map((q, idx) => (
-                        <div key={q.id} className="bg-white/5 p-4 rounded-sm" data-testid={`question-${idx}`}>
-                          <div className="flex items-start gap-3 mb-2">
-                            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
-                              {q.username.charAt(0).toUpperCase()}
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-textMain font-mono text-sm font-bold">{q.username}</span>
-                                <span className="text-xs text-textMuted font-mono">
-                                  {new Date(q.created_at).toLocaleDateString()}
-                                </span>
-                              </div>
-                              <p className="text-textMuted text-sm">{q.question}</p>
-                              
-                              {q.reply && (
-                                <div className="mt-3 pl-4 border-l-2 border-secondary">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-secondary font-mono text-xs font-bold">Admin Reply:</span>
-                                    <span className="text-xs text-textMuted font-mono">{q.replied_by}</span>
-                                  </div>
-                                  <p className="text-textMain text-sm">{q.reply}</p>
-                                </div>
-                              )}
-                              
-                              {!q.reply && (
-                                <p className="text-xs text-textMuted font-mono mt-2">⏳ Waiting for admin response...</p>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-8">
-                        <MessageCircle className="w-12 h-12 text-textMuted mx-auto mb-3" />
-                        <p className="text-textMuted font-mono text-sm">No questions yet. Be the first to ask!</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
 
             {tasks.length > 0 && (
               <div className="cyber-card p-6 rounded-sm">
-                <h3 className="text-xl font-heading font-bold text-textMain mb-4">Tasks ({tasks.length})</h3>
+                <h3 className="text-xl font-heading font-bold text-textMain mb-4">Tasks</h3>
                 <div className="space-y-3">
                   {tasks.slice(0, 10).map((task, idx) => (
                     <div key={`task-${idx}`} className="flex items-start gap-3 p-3 bg-white/5 rounded-sm" data-testid={`task-${idx}`}>
@@ -367,6 +237,63 @@ const RoomDetail = () => {
                 </div>
               </div>
             )}
+          </div>
+
+          <div className="lg:col-span-1">
+            <div className="cyber-card p-6 rounded-sm">
+              <h3 className="text-xl font-heading font-bold text-textMain mb-4 flex items-center gap-2">
+                <Flag className="w-5 h-5 text-primary" />
+                Answer the Questions
+              </h3>
+              
+              {roomFlags.length > 0 ? (
+                <div className="space-y-4">
+                  {roomFlags.map((flag, idx) => {
+                    const isAnswered = answeredFlags.includes(flag.id);
+                    return (
+                      <div key={flag.id} className="border border-white/10 p-4 rounded-sm" data-testid={`flag-question-${idx}`}>
+                        <div className="flex items-start gap-2 mb-3">
+                          <span className="text-primary font-mono font-bold">{idx + 1}.</span>
+                          <div className="flex-1">
+                            <p className="text-textMain font-mono text-sm mb-2">{flag.question}</p>
+                            {isAnswered ? (
+                              <div className="flex items-center gap-2 bg-primary/10 px-3 py-2 rounded-sm">
+                                <CheckCircle className="w-4 h-4 text-primary" />
+                                <span className="text-primary font-mono text-sm font-bold">Correct! +{flag.points} pts</span>
+                              </div>
+                            ) : (
+                              <div className="space-y-2">
+                                <Input
+                                  type="text"
+                                  value={flagAnswers[flag.id] || ''}
+                                  onChange={(e) => handleAnswerChange(flag.id, e.target.value)}
+                                  placeholder="Your answer..."
+                                  className="bg-black/50 border-white/20 focus:border-primary text-white font-mono rounded-none"
+                                  data-testid={`answer-input-${idx}`}
+                                />
+                                <Button
+                                  onClick={() => handleSubmitAnswer(flag.id)}
+                                  disabled={submittingFlag === flag.id || !flagAnswers[flag.id]?.trim()}
+                                  className="w-full bg-primary text-black hover:bg-primaryDim font-bold uppercase tracking-wider text-sm"
+                                  data-testid={`submit-answer-${idx}`}
+                                >
+                                  {submittingFlag === flag.id ? 'Checking...' : 'Submit'}
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Flag className="w-12 h-12 text-textMuted mx-auto mb-3" />
+                  <p className="text-textMuted font-mono text-sm">No questions added yet</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
