@@ -35,16 +35,32 @@ const RoomDetail = () => {
   };
 
   const handleStartLab = async () => {
-    if (startingLab) return; // Prevent double clicks
+    if (startingLab) return;
     
     setStartingLab(true);
     try {
+      // Check lab type and navigate accordingly
+      if (room.lab_type === 'code_editor') {
+        // Navigate to code editor
+        toast.success('Opening code editor...');
+        navigate(`/challenges/python-${roomId}`);
+        return;
+      }
+      
+      if (room.lab_type === 'web') {
+        // Start web lab
+        const response = await labAPI.start({ room_id: roomId });
+        toast.success('Web challenge loaded!');
+        navigate(`/web-lab/${response.data.id}`);
+        return;
+      }
+      
+      // Default: terminal lab
       const response = await labAPI.start({ room_id: roomId });
       const sessionId = response.data.id;
       
       if (sessionId) {
-        toast.success('Lab started successfully!');
-        // Navigate after a brief delay to ensure session is ready
+        toast.success('Terminal lab started!');
         setTimeout(() => {
           navigate(`/lab/${sessionId}`);
         }, 500);
