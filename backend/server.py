@@ -88,6 +88,7 @@ class RoomModel(BaseModel):
     description: str
     difficulty: str
     category: str
+    room_type: str = "cybersecurity"  # cybersecurity or programming
     content: str
     tasks: List[Dict[str, Any]] = []
     flags: List[str] = []
