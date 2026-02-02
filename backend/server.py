@@ -93,7 +93,10 @@ class RoomModel(BaseModel):
     flags: List[str] = []
     xp_reward: int = 100
     has_lab: bool = False
+    lab_type: str = "terminal"  # terminal, web, code_editor
     docker_image: str = "ubuntu:20.04"
+    web_app_url: Optional[str] = None
+    code_language: Optional[str] = "python"
     roadmap_id: Optional[str] = None
 
 class LabSession(BaseModel):
