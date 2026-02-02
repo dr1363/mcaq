@@ -39,15 +39,18 @@ const LabPage = () => {
           white: '#e0e0e0',
         },
         scrollback: 1000,
-        rows: 30,
-        cols: 100,
       });
 
+      const fitAddon = new FitAddon();
       const webLinksAddon = new WebLinksAddon();
+      
+      terminal.loadAddon(fitAddon);
       terminal.loadAddon(webLinksAddon);
       terminal.open(terminalRef.current);
-      
+      fitAddon.fit();
+
       xtermRef.current = terminal;
+      fitAddonRef.current = fitAddon;
 
       terminal.writeln('\x1b[1;32m=== HackLidoLearn Lab Terminal ===\x1b[0m');
       terminal.writeln('\x1b[36mConnected to lab environment\x1b[0m');
@@ -59,7 +62,16 @@ const LabPage = () => {
         handleTerminalInput(data, terminal);
       });
 
+      const handleResize = () => {
+        if (fitAddonRef.current) {
+          fitAddonRef.current.fit();
+        }
+      };
+
+      window.addEventListener('resize', handleResize);
+
       return () => {
+        window.removeEventListener('resize', handleResize);
         if (terminal) {
           terminal.dispose();
         }
