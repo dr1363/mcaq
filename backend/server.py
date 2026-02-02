@@ -264,13 +264,13 @@ async def delete_room(room_id: str, current_user: dict = Depends(get_current_use
 
 @api_router.post("/labs/start")
 async def start_lab(request: StartLabRequest, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
-    room = await db.rooms.find_one({'id': room_id}, {'_id': 0})
+    room = await db.rooms.find_one({'id': request.room_id}, {'_id': 0})
     if not room or not room.get('has_lab'):
         raise HTTPException(status_code=400, detail="Room has no lab")
     
     existing_session = await db.lab_sessions.find_one({
         'user_id': current_user['id'],
-        'room_id': room_id,
+        'room_id': request.room_id,
         'status': 'running'
     }, {'_id': 0})
     
@@ -279,7 +279,7 @@ async def start_lab(request: StartLabRequest, background_tasks: BackgroundTasks,
     
     session = LabSession(
         user_id=current_user['id'],
-        room_id=room_id,
+        room_id=request.room_id,
         status="starting"
     )
     
