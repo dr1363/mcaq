@@ -23,8 +23,8 @@ const AdminRooms = () => {
     xp_reward: 100,
     has_lab: false,
     docker_image: 'ubuntu:20.04',
-    flags: [],
-    tasks: []
+    flags: '',
+    tasks: ''
   });
 
   useEffect(() => {
