@@ -44,11 +44,18 @@ const AdminRooms = () => {
 
   const handleSubmit = async () => {
     try {
+      // Parse flags and tasks from comma-separated strings to arrays
+      const roomData = {
+        ...formData,
+        flags: formData.flags ? formData.flags.split(',').map(f => f.trim()).filter(f => f) : [],
+        tasks: formData.tasks ? formData.tasks.split('\n').map(t => t.trim()).filter(t => t).map(task => ({ description: task })) : []
+      };
+      
       if (editingRoom) {
-        await roomAPI.update(editingRoom.id, formData);
+        await roomAPI.update(editingRoom.id, roomData);
         toast.success('Room updated successfully');
       } else {
-        await roomAPI.create(formData);
+        await roomAPI.create(roomData);
         toast.success('Room created successfully');
       }
       setIsDialogOpen(false);
