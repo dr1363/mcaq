@@ -621,8 +621,13 @@ const babelMetadataPlugin = ({ types: t }) => {
   /**
    * Analyzes a member expression like item.name or obj.prop.value
    */
-  function analyzeMemberExpression(exprPath, state) {
+  function analyzeMemberExpression(exprPath, state, depth = 0) {
     const node = exprPath.node;
+    
+    // Prevent infinite recursion with depth limit
+    if (depth > 10) {
+      return { type: "unknown", isEditable: false };
+    }
 
     // Build the property path (e.g., "name" or "address.city")
     const propPath = buildPropertyPath(node);
