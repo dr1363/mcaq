@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Terminal as XTerm } from 'xterm';
-import { FitAddon } from 'xterm-addon-fit';
 import { WebLinksAddon } from 'xterm-addon-web-links';
 import 'xterm/css/xterm.css';
 import Navbar from '../components/Navbar';
@@ -14,7 +13,6 @@ const LabPage = () => {
   const { sessionId } = useParams();
   const terminalRef = useRef(null);
   const xtermRef = useRef(null);
-  const fitAddonRef = useRef(null);
   const [commandHistory, setCommandHistory] = useState([]);
   const [currentCommand, setCurrentCommand] = useState('');
   const [historyIndex, setHistoryIndex] = useState(-1);
