@@ -35,14 +35,27 @@ const RoomDetail = () => {
   };
 
   const handleStartLab = async () => {
+    if (startingLab) return; // Prevent double clicks
+    
     setStartingLab(true);
     try {
       const response = await labAPI.start({ room_id: roomId });
-      toast.success('Lab started! Launching terminal...');
-      navigate(`/lab/${response.data.id}`);
+      const sessionId = response.data.id;
+      
+      if (sessionId) {
+        toast.success('Lab started successfully!');
+        // Navigate after a brief delay to ensure session is ready
+        setTimeout(() => {
+          navigate(`/lab/${sessionId}`);
+        }, 500);
+      } else {
+        toast.error('Failed to get session ID');
+        setStartingLab(false);
+      }
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to start lab');
-    } finally {
+      console.error('Lab start error:', error);
+      const errorMsg = error.response?.data?.detail || error.message || 'Failed to start lab';
+      toast.error(errorMsg);
       setStartingLab(false);
     }
   };
