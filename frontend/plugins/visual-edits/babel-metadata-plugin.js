@@ -926,7 +926,12 @@ const babelMetadataPlugin = ({ types: t }) => {
   /**
    * Detects if we're inside an array iteration (.map(), etc.) and extracts context
    */
-  function getArrayIterationContext(exprPath, state) {
+  function getArrayIterationContext(exprPath, state, depth = 0) {
+    // Prevent infinite recursion with depth limit
+    if (depth > 10) {
+      return null;
+    }
+    
     // Find the parent .map() or similar call
     const callExprParent = exprPath.findParent((p) => {
       if (!p.isCallExpression()) return false;
