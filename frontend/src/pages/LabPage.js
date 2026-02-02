@@ -46,21 +46,25 @@ const LabPage = () => {
       const fitAddon = new FitAddon();
       const webLinksAddon = new WebLinksAddon();
       
-      terminal.loadAddon(fitAddon);
       terminal.loadAddon(webLinksAddon);
       terminal.open(terminalRef.current);
       
+      // Load fitAddon after terminal is opened
+      terminal.loadAddon(fitAddon);
+      
+      xtermRef.current = terminal;
+      fitAddonRef.current = fitAddon;
+
       // Wait for terminal to be fully rendered before fitting
       setTimeout(() => {
         try {
-          fitAddon.fit();
+          if (fitAddonRef.current && xtermRef.current) {
+            fitAddonRef.current.fit();
+          }
         } catch (e) {
           console.error('Error fitting terminal:', e);
         }
-      }, 100);
-
-      xtermRef.current = terminal;
-      fitAddonRef.current = fitAddon;
+      }, 300);
 
       terminal.writeln('\x1b[1;32m=== HackLidoLearn Lab Terminal ===\x1b[0m');
       terminal.writeln('\x1b[36mConnected to lab environment\x1b[0m');
@@ -73,13 +77,15 @@ const LabPage = () => {
       });
 
       const handleResize = () => {
-        if (fitAddonRef.current) {
-          try {
-            fitAddonRef.current.fit();
-          } catch (e) {
-            console.error('Error fitting terminal on resize:', e);
+        setTimeout(() => {
+          if (fitAddonRef.current && xtermRef.current) {
+            try {
+              fitAddonRef.current.fit();
+            } catch (e) {
+              console.error('Error fitting terminal on resize:', e);
+            }
           }
-        }
+        }, 100);
       };
 
       window.addEventListener('resize', handleResize);
