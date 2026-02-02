@@ -263,7 +263,7 @@ async def delete_room(room_id: str, current_user: dict = Depends(get_current_use
     return {'message': 'Room deleted'}
 
 @api_router.post("/labs/start")
-async def start_lab(room_id: str, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
+async def start_lab(request: StartLabRequest, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
     room = await db.rooms.find_one({'id': room_id}, {'_id': 0})
     if not room or not room.get('has_lab'):
         raise HTTPException(status_code=400, detail="Room has no lab")
