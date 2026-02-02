@@ -330,9 +330,14 @@ async def start_lab(request: StartLabRequest, background_tasks: BackgroundTasks,
     session_dict = session.model_dump()
     if session.started_at:
         session_dict['started_at'] = session.started_at.isoformat()
-    await db.lab_sessions.insert_one(session_dict)
+    if session.ended_at:
+        session_dict['ended_at'] = session.ended_at.isoformat()
     
-    return session_dict
+    # Insert without _id in response
+    await db.lab_sessions.insert_one({**session_dict, '_id': session.id})
+    
+    # Return clean dict without _id
+    return {k: v for k, v in session_dict.items() if k != '_id'}
 
 async def auto_stop_container(container_id: str, timeout: int):
     await asyncio.sleep(timeout)
