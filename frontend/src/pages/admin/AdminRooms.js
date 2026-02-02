@@ -53,19 +53,63 @@ const AdminRooms = () => {
         tasks: formData.tasks ? formData.tasks.split('\n').map(t => t.trim()).filter(t => t).map(task => ({ description: task })) : []
       };
       
+      let roomId;
       if (editingRoom) {
         await roomAPI.update(editingRoom.id, roomData);
+        roomId = editingRoom.id;
         toast.success('Room updated successfully');
       } else {
-        await roomAPI.create(roomData);
+        const response = await roomAPI.create(roomData);
+        roomId = response.data.id;
         toast.success('Room created successfully');
       }
+      
+      // Upload files if any selected
+      if (selectedFiles.length > 0 && roomId) {
+        await handleFileUpload(roomId);
+      }
+      
       setIsDialogOpen(false);
       setEditingRoom(null);
       resetForm();
       fetchRooms();
     } catch (error) {
       toast.error('Failed to save room');
+    }
+  };
+
+  const handleFileUpload = async (roomId) => {
+    if (!selectedFiles.length) return;
+    
+    setUploadingFiles(true);
+    try {
+      const formData = new FormData();
+      selectedFiles.forEach(file => {
+        formData.append('files', file);
+      });
+      
+      const token = localStorage.getItem('token');
+      const response = await fetch(
+        `${process.env.REACT_APP_BACKEND_URL}/api/admin/upload-lab-files?room_id=${roomId}`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        }
+      );
+      
+      if (response.ok) {
+        toast.success(`Uploaded ${selectedFiles.length} file(s) successfully`);
+        setSelectedFiles([]);
+      } else {
+        toast.error('Failed to upload files');
+      }
+    } catch (error) {
+      toast.error('Error uploading files');
+    } finally {
+      setUploadingFiles(false);
     }
   };
 
