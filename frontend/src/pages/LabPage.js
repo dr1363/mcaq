@@ -20,63 +20,96 @@ const LabPage = () => {
   const [historyIndex, setHistoryIndex] = useState(-1);
 
   useEffect(() => {
-    if (terminalRef.current && !xtermRef.current) {
-      const terminal = new XTerm({
-        cursorBlink: true,
-        fontSize: 14,
-        fontFamily: 'JetBrains Mono, monospace',
-        theme: {
-          background: '#000000',
-          foreground: '#00ff41',
-          cursor: '#00ff41',
-          black: '#000000',
-          red: '#ff003c',
-          green: '#00ff41',
-          yellow: '#ffff00',
-          blue: '#00f3ff',
-          magenta: '#ff00ff',
-          cyan: '#00f3ff',
-          white: '#e0e0e0',
-        },
-        scrollback: 1000,
-      });
+    // Add a small delay to ensure DOM is ready
+    const initTimer = setTimeout(() => {
+      if (terminalRef.current && !xtermRef.current) {
+        try {
+          const terminal = new XTerm({
+            cursorBlink: true,
+            fontSize: 14,
+            fontFamily: 'JetBrains Mono, monospace',
+            theme: {
+              background: '#000000',
+              foreground: '#00ff41',
+              cursor: '#00ff41',
+              black: '#000000',
+              red: '#ff003c',
+              green: '#00ff41',
+              yellow: '#ffff00',
+              blue: '#00f3ff',
+              magenta: '#ff00ff',
+              cyan: '#00f3ff',
+              white: '#e0e0e0',
+            },
+            scrollback: 1000,
+            rows: 25,
+            cols: 80,
+          });
 
-      const fitAddon = new FitAddon();
-      const webLinksAddon = new WebLinksAddon();
-      
-      terminal.loadAddon(fitAddon);
-      terminal.loadAddon(webLinksAddon);
-      terminal.open(terminalRef.current);
-      fitAddon.fit();
+          const fitAddon = new FitAddon();
+          const webLinksAddon = new WebLinksAddon();
+          
+          terminal.loadAddon(fitAddon);
+          terminal.loadAddon(webLinksAddon);
+          terminal.open(terminalRef.current);
+          
+          // Fit after a small delay
+          setTimeout(() => {
+            fitAddon.fit();
+          }, 100);
 
-      xtermRef.current = terminal;
-      fitAddonRef.current = fitAddon;
+          xtermRef.current = terminal;
+          fitAddonRef.current = fitAddon;
 
-      terminal.writeln('\x1b[1;32m=== HackLidoLearn Lab Terminal ===\x1b[0m');
-      terminal.writeln('\x1b[36mConnected to lab environment\x1b[0m');
-      terminal.writeln('\x1b[33mType commands below and press Enter to execute\x1b[0m');
-      terminal.writeln('');
-      writePrompt(terminal);
+          // Write welcome messages
+          terminal.writeln('\x1b[1;32m╔═══════════════════════════════════════╗\x1b[0m');
+          terminal.writeln('\x1b[1;32m║   HackLidoLearn Lab Terminal v1.0    ║\x1b[0m');
+          terminal.writeln('\x1b[1;32m╚═══════════════════════════════════════╝\x1b[0m');
+          terminal.writeln('');
+          terminal.writeln('\x1b[36m✓ Connected to lab environment\x1b[0m');
+          terminal.writeln('\x1b[33m✓ Session ID: ' + sessionId + '\x1b[0m');
+          terminal.writeln('');
+          terminal.writeln('\x1b[1;37mAvailable commands:\x1b[0m');
+          terminal.writeln('  \x1b[32mls\x1b[0m       - List files');
+          terminal.writeln('  \x1b[32mpwd\x1b[0m      - Print working directory');
+          terminal.writeln('  \x1b[32mwhoami\x1b[0m   - Display current user');
+          terminal.writeln('  \x1b[32mcat\x1b[0m      - Display file contents');
+          terminal.writeln('  \x1b[32mecho\x1b[0m     - Print text');
+          terminal.writeln('');
+          writePrompt(terminal);
+          
+          // Focus the terminal
+          terminal.focus();
 
-      terminal.onData((data) => {
-        handleTerminalInput(data, terminal);
-      });
+          terminal.onData((data) => {
+            handleTerminalInput(data, terminal);
+          });
 
-      const handleResize = () => {
-        if (fitAddonRef.current) {
-          fitAddonRef.current.fit();
+          const handleResize = () => {
+            if (fitAddonRef.current) {
+              try {
+                fitAddonRef.current.fit();
+              } catch (e) {
+                console.error('Resize error:', e);
+              }
+            }
+          };
+
+          window.addEventListener('resize', handleResize);
+
+          return () => {
+            window.removeEventListener('resize', handleResize);
+            if (terminal) {
+              terminal.dispose();
+            }
+          };
+        } catch (error) {
+          console.error('Terminal initialization error:', error);
         }
-      };
+      }
+    }, 200);
 
-      window.addEventListener('resize', handleResize);
-
-      return () => {
-        window.removeEventListener('resize', handleResize);
-        if (terminal) {
-          terminal.dispose();
-        }
-      };
-    }
+    return () => clearTimeout(initTimer);
     // eslint-disable-next-line
   }, []);
 
