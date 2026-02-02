@@ -39,6 +39,8 @@ const LabPage = () => {
           white: '#e0e0e0',
         },
         scrollback: 1000,
+        rows: 24,
+        cols: 80,
       });
 
       const fitAddon = new FitAddon();
@@ -47,7 +49,15 @@ const LabPage = () => {
       terminal.loadAddon(fitAddon);
       terminal.loadAddon(webLinksAddon);
       terminal.open(terminalRef.current);
-      fitAddon.fit();
+      
+      // Wait for terminal to be fully rendered before fitting
+      setTimeout(() => {
+        try {
+          fitAddon.fit();
+        } catch (e) {
+          console.error('Error fitting terminal:', e);
+        }
+      }, 100);
 
       xtermRef.current = terminal;
       fitAddonRef.current = fitAddon;
@@ -62,14 +72,26 @@ const LabPage = () => {
         handleTerminalInput(data, terminal);
       });
 
-      window.addEventListener('resize', () => {
-        fitAddon.fit();
-      });
+      const handleResize = () => {
+        if (fitAddonRef.current) {
+          try {
+            fitAddonRef.current.fit();
+          } catch (e) {
+            console.error('Error fitting terminal on resize:', e);
+          }
+        }
+      };
+
+      window.addEventListener('resize', handleResize);
 
       return () => {
-        terminal.dispose();
+        window.removeEventListener('resize', handleResize);
+        if (terminal) {
+          terminal.dispose();
+        }
       };
     }
+    // eslint-disable-next-line
   }, []);
 
   const writePrompt = (terminal) => {
