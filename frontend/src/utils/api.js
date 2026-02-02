@@ -37,7 +37,7 @@ export const roomAPI = {
 };
 
 export const labAPI = {
-  start: (roomId) => api.post('/labs/start', null, { params: { room_id: roomId } }),
+  start: (data) => api.post('/labs/start', data),
   execute: (sessionId, command) => api.post(`/labs/${sessionId}/execute`, { command }),
   stop: (sessionId) => api.post(`/labs/${sessionId}/stop`),
 };
