@@ -160,7 +160,9 @@ const RoomDetail = () => {
                 ) : (
                   <span className="flex items-center gap-2">
                     <Play className="w-5 h-5" />
-                    Start Lab
+                    {room.lab_type === 'code_editor' ? 'Open Code Editor' :
+                     room.lab_type === 'web' ? 'Launch Web Challenge' :
+                     'Start Terminal Lab'}
                   </span>
                 )}
               </Button>
