@@ -17,6 +17,10 @@ const AdminRooms = () => {
   const [roomType, setRoomType] = useState('cybersecurity');
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [roomFlags, setRoomFlags] = useState([]);
+  const [newFlagQuestion, setNewFlagQuestion] = useState('');
+  const [newFlagAnswer, setNewFlagAnswer] = useState('');
+  const [newFlagPoints, setNewFlagPoints] = useState(10);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
