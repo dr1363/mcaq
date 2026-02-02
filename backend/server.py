@@ -636,6 +636,48 @@ async def get_admin_stats(current_user: dict = Depends(get_current_user)):
         'active_sessions': active_sessions
     }
 
+@api_router.post("/questions/ask")
+async def ask_question(room_id: str, question_data: Dict[str, str], current_user: dict = Depends(get_current_user)):
+    question = QuestionModel(
+        room_id=room_id,
+        user_id=current_user['id'],
+        username=current_user['username'],
+        question=question_data.get('question', '')
+    )
+    
+    question_dict = question.model_dump()
+    question_dict['created_at'] = question.created_at.isoformat()
+    await db.questions.insert_one(question_dict)
+    
+    return {k: v for k, v in question_dict.items() if k != '_id'}
+
+@api_router.get("/questions/{room_id}")
+async def get_questions(room_id: str):
+    questions = await db.questions.find(
+        {'room_id': room_id},
+        {'_id': 0}
+    ).sort('created_at', -1).to_list(100)
+    return questions
+
+@api_router.put("/admin/questions/{question_id}/reply")
+async def reply_question(question_id: str, reply_data: Dict[str, str], current_user: dict = Depends(get_current_user)):
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    result = await db.questions.update_one(
+        {'id': question_id},
+        {'$set': {
+            'reply': reply_data.get('reply'),
+            'replied_by': current_user['username'],
+            'replied_at': datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    return {'message': 'Reply added successfully'}
+
 app.include_router(api_router)
 
 app.add_middleware(
