@@ -372,16 +372,16 @@ async def stop_lab(session_id: str, current_user: dict = Depends(get_current_use
 
 @api_router.post("/flags/submit")
 async def submit_flag(request: SubmitFlagRequest, current_user: dict = Depends(get_current_user)):
-    room = await db.rooms.find_one({'id': room_id}, {'_id': 0})
+    room = await db.rooms.find_one({'id': request.room_id}, {'_id': 0})
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")
     
-    submitted_flag = flag.get('flag', '')
+    submitted_flag = request.flag
     is_correct = submitted_flag in room.get('flags', [])
     
     if is_correct:
         progress = await db.user_progress.find_one(
-            {'user_id': current_user['id'], 'room_id': room_id},
+            {'user_id': current_user['id'], 'room_id': request.room_id},
             {'_id': 0}
         )
         
